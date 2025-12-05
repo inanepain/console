@@ -1,0 +1,6 @@
+= Install
+
+[source,shell]
+====
+$ composer require {pkg-id}
+====
