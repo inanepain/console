@@ -1,0 +1,39 @@
+== Quick Start
+
+=== Your First Command
+
+Create a simple command that greets a user:
+
+[source,php]
+----
+<?php
+
+class HelloCommands
+{
+    #[Command('hello', 'Say hello to someone')]
+    public function hello(
+        #[Argument('Name of the person to greet')]
+        string $name
+    ): int {
+        echo "Hello, {$name}!" . PHP_EOL;
+        return 0;
+    }
+}
+----
+
+Register and run:
+
+[source,php]
+----
+$router = new ConsoleRouter($argv);
+$router->register(HelloCommands::class);
+exit($router->run());
+----
+
+Usage:
+
+[source,bash]
+----
+php console.php hello John
+# Output: Hello, John!
+----

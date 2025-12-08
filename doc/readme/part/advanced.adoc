@@ -1,0 +1,153 @@
+== Advanced Usage
+
+=== Command Namespacing
+
+Use colons (`:`) to organize commands into namespaces:
+
+[source,php]
+----
+class DatabaseCommands
+{
+    #[Command('db:migrate', 'Run database migrations')]
+    public function migrate(): int { /* ... */ }
+    
+    #[Command('db:seed', 'Seed the database')]
+    public function seed(): int { /* ... */ }
+    
+    #[Command('db:reset', 'Reset the database')]
+    public function reset(): int { /* ... */ }
+}
+----
+
+These will be automatically grouped in the help output:
+
+[source,bash]
+----
+Available Commands:
+
+  db
+    db:migrate          Run database migrations
+    db:seed             Seed the database
+    db:reset            Reset the database
+----
+
+=== Multiple Controllers
+
+Register multiple command controllers:
+
+[source,php]
+----
+$router = new ConsoleRouter($argv);
+$router->register(DatabaseCommands::class);
+$router->register(CacheCommands::class);
+$router->register(UserCommands::class);
+exit($router->run());
+----
+
+=== Exit Codes
+
+Return appropriate exit codes from your commands:
+
+[cols="1,3"]
+|===
+|Code |Meaning
+
+|`0`
+|Success
+
+|`1`
+|General error
+
+|`2`
+|Misuse of command
+
+|`126`
+|Command cannot execute
+
+|`127`
+|Command not found
+|===
+
+[source,php]
+----
+#[Command('validate', 'Validate configuration')]
+public function validate(): int
+{
+    if (!file_exists('config.php')) {
+        echo "Error: config.php not found" . PHP_EOL;
+        return 1;
+    }
+    
+    if (!$this->isValidConfig()) {
+        echo "Error: Invalid configuration" . PHP_EOL;
+        return 1;
+    }
+    
+    echo "Configuration is valid!" . PHP_EOL;
+    return 0;
+}
+----
+
+=== Complex Example
+
+A comprehensive example combining all features:
+
+[source,php]
+----
+class DeployCommands
+{
+    #[Command('deploy:app', 'Deploy application to server', ['deploy'])]
+    public function deployApp(
+        #[Argument('Target environment (staging/production)', required: true)]
+        string $environment,
+        
+        #[Argument('Git branch to deploy', required: false, default: 'main')]
+        string $branch = 'main',
+        
+        #[Option('force', 'f', 'Skip safety checks', valueless: true)]
+        bool $force = false,
+        
+        #[Option('rollback', 'r', 'Rollback on failure', valueless: true)]
+        bool $rollback = true,
+        
+        #[Option('timeout', 't', 'Deployment timeout in seconds', 300)]
+        int $timeout = 300
+    ): int {
+        echo "Deploying branch '{$branch}' to {$environment}" . PHP_EOL;
+        echo "Timeout: {$timeout}s" . PHP_EOL;
+        
+        if ($force) {
+            echo "⚠️  Skipping safety checks" . PHP_EOL;
+        }
+        
+        if (!$rollback) {
+            echo "⚠️  Auto-rollback disabled" . PHP_EOL;
+        }
+        
+        // Deployment logic here...
+        
+        echo "✓ Deployment successful!" . PHP_EOL;
+        return 0;
+    }
+}
+----
+
+Usage examples:
+
+[source,bash]
+----
+# Basic deployment
+php console.php deploy:app staging
+
+# Deploy specific branch
+php console.php deploy:app production develop
+
+# With options
+php console.php deploy:app production --force --timeout=600
+
+# Using shortcuts
+php console.php deploy:app staging -f -t 120
+
+# Using alias
+php console.php deploy production main --force
+----

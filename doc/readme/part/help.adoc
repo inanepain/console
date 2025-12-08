@@ -1,0 +1,53 @@
+== Help System
+
+=== Viewing Help
+
+==== List All Commands
+
+[source,bash]
+----
+php console.php
+php console.php list
+php console.php --help
+php console.php -h
+----
+
+==== Command-Specific Help
+
+[source,bash]
+----
+php console.php <command> --help
+php console.php <command> -h
+----
+
+Example:
+
+[source,bash]
+----
+php console.php user:create --help
+----
+
+Output:
+
+----
+Description:
+  Create a new user
+
+Usage:
+  php console.php user:create <username> <email> [options]
+
+Arguments:
+  username             [required] Username for the new user
+  email                [required] Email address
+
+Options:
+  -a, --admin          Create as admin user
+  -h, --help           Display help for this command
+----
+
+=== Version Information
+
+[source,bash]
+----
+php console.php --version
+----

@@ -1,6 +1,34 @@
-= Install
+== Install
 
 [source,shell]
 ====
 $ composer require {pkg-id}
 ====
+
+=== Basic Setup
+
+.Create your project structure:
+[source,bash]
+----
+project/
+├── console.php
+├── src/
+│   ├── AppCommands.php
+----
+
+.Create your `console.php` bootstrap file:
+[source,php]
+----
+<?php
+require_once 'vendor/autoload.php'; // or your autoloader
+
+$router = new ConsoleRouter($argv);
+$router->register(AppCommands::class);
+exit($router->run());
+----
+
+.Make it executable:
+[source,bash]
+----
+chmod +x console.php
+----

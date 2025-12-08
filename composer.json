@@ -17,12 +17,16 @@
         "issues": "https://git.cathedral.co.za:3000/inanepain/console/issues"
     },
     "keywords": [
+        "library",
+        "composer",
         "inanepain",
         "php",
         "console",
         "command",
         "argument",
-        "router"
+        "route",
+        "router",
+        "routing"
     ],
     "autoload": {
         "psr-4": {

@@ -1,0 +1,34 @@
+== Troubleshooting
+
+=== Common Issues
+
+==== "Command not found"
+
+**Problem**: Command doesn't appear in the list
+
+**Solutions**:
+
+* Ensure the controller class is registered
+* Check that the method is `public`
+* Verify the `#[Command]` attribute syntax
+* Make sure PHP 8.0+ is being used
+
+==== "Required argument missing"
+
+**Problem**: Error when running command
+
+**Solutions**:
+
+* Check argument order matches method signature
+* Verify `required: true` is set correctly
+* Provide all required arguments when calling
+
+==== Colors not showing
+
+**Problem**: Terminal output has escape codes instead of colors
+
+**Solutions**:
+
+* Check terminal supports ANSI colors
+* On Windows, use Windows Terminal or enable VT100 support
+* Test with: `echo -e "\033[32mGreen text\033[0m"`

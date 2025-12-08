@@ -1,0 +1,20 @@
+== Introduction
+
+The PHP Console Router is a modern, attribute-based command-line application framework for PHP 8+. It provides an elegant way to define CLI commands using PHP attributes, automatic argument parsing, and beautiful help documentation.
+
+=== Features
+
+* ✅ Attribute-based command definition
+* ✅ Automatic argument and option parsing
+* ✅ Short and long option formats (`-f`, `--force`)
+* ✅ Required and optional arguments
+* ✅ Default values for parameters
+* ✅ Command aliases
+* ✅ Automatic help generation
+* ✅ Color-coded terminal output
+* ✅ Command grouping by namespace
+
+=== Requirements
+
+* PHP 8.0 or higher
+* CLI SAPI (command-line interface)
