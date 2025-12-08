@@ -1,0 +1,65 @@
+== Best Practices
+
+=== Command Design
+
+. **Use descriptive names**: `user:create` instead of `ucreate`
+. **Group related commands**: Use namespaces (`cache:clear`, `cache:warm`)
+. **Keep commands focused**: One command = one task
+. **Provide clear descriptions**: Help users understand what each command does
+
+=== Error Handling
+
+Always handle errors gracefully:
+
+[source,php]
+----
+#[Command('file:process', 'Process a file')]
+public function processFile(
+    #[Argument('File path')]
+    string $path
+): int {
+    if (!file_exists($path)) {
+        echo "Error: File not found: {$path}" . PHP_EOL;
+        return 1;
+    }
+    
+    try {
+        // Process file...
+        echo "File processed successfully" . PHP_EOL;
+        return 0;
+    } catch (\Exception $e) {
+        echo "Error: " . $e->getMessage() . PHP_EOL;
+        return 1;
+    }
+}
+----
+
+=== User Feedback
+
+Provide clear feedback to users:
+
+[source,php]
+----
+#[Command('import:data', 'Import data from CSV')]
+public function importData(
+    #[Argument('CSV file path')]
+    string $file
+): int {
+    echo "Starting import from {$file}..." . PHP_EOL;
+    
+    $rows = $this->readCsv($file);
+    $total = count($rows);
+    
+    foreach ($rows as $i => $row) {
+        $this->importRow($row);
+        
+        // Progress indicator
+        if (($i + 1) % 100 === 0) {
+            echo "Imported " . ($i + 1) . " / {$total} rows..." . PHP_EOL;
+        }
+    }
+    
+    echo "✓ Import complete! {$total} rows imported." . PHP_EOL;
+    return 0;
+}
+----

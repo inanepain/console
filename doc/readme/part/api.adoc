@@ -1,0 +1,42 @@
+== API Reference
+
+=== ConsoleRouter Class
+
+==== Methods
+
+===== `__construct(array $argv = [])`
+
+Initialize the router with command-line arguments.
+
+[source,php]
+----
+$router = new ConsoleRouter($argv);
+----
+
+===== `register(string $controllerClass): void`
+
+Register a controller class containing commands.
+
+[source,php]
+----
+$router->register(AppCommands::class);
+----
+
+===== `run(): int`
+
+Execute the router and return exit code.
+
+[source,php]
+----
+exit($router->run());
+----
+
+===== `getCommands(): array`
+
+Get all registered commands (useful for debugging).
+
+[source,php]
+----
+$commands = $router->getCommands();
+var_dump($commands);
+----

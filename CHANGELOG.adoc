@@ -1,9 +1,9 @@
 = Changelog: inanepain/console
 :author: Philip Michael Raab
 :email: <philip@cathedral.co.za>
-:keywords: inanepain, php, console, command, argument, router
+:keywords: library,inanepain,composer,php,console,routing,route,router,command,argument
 :description: Console routing and argument handling.
-:revnumber: 0.1.0
+:revnumber: 0.2.0
 :revdate: 2025-12-24
 :copyright: Unlicense
 :experimental:
@@ -16,12 +16,21 @@
 
 == History
 
+// include::./release/0.0.0.adoc[leveloffset=+2]
 :leveloffset: +2
 
-= 0.1.0-dev (2025 Nov 24)
+= 0.2.0 (2025 Dec 08)
+:revnumber: 0.2.0
+:revdate: 2025-12-08
+
+* Improved help.
+
+:leveloffset!:
+:leveloffset: +2
+
+= 0.1.0 (2025 Dec 01)
 :revnumber: 0.1.0
-:revdate: 2025-12-24
-:revremark: -dev
+:revdate: 2025-12-01
 
 * initial release.
 
