@@ -294,7 +294,7 @@ class ConsoleRouter {
 
         $this->output("\033[1mGlobal Options:\033[0m");   // Writes a plain line to stdout.
         $this->output("  \033[32m-h, --help\033[0m         Display help for a command");   // Writes a plain line to stdout.
-        $this->output("  \033[32m--version\033[0m          Display application version\n");   // Writes a plain line to stdout.
+        $this->output("  \033[32m--version\033[0m          Display application version" . PHP_EOL);   // Writes a plain line to stdout.
 
         $this->output("\033[90mRun '$this->executable <command> --help' for command-specific help.\033[0m\n");   // Writes a plain line to stdout.
     }
@@ -503,7 +503,7 @@ class ConsoleRouter {
             return is_int($result) ? $result : 0;   // Find whether the type of a variable is integer
         } catch (Exception $e) {                                                                         // Exception is the base class for
             static::$error->error($e->getMessage());                                                              // Writes an error line (red) to stdout.
-            $this->output("\nRun '$this->executable $commandName --help' for usage information.\n");     // Writes a plain line to stdout.
+            $this->output(PHP_EOL . "Run '$this->executable $commandName --help' for usage information." . PHP_EOL);     // Writes a plain line to stdout.
 
             return 1;
         }
