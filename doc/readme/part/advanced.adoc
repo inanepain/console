@@ -88,9 +88,9 @@ public function validate(): int
 }
 ----
 
-=== Spread Example
+=== Variadic argument Example
 
-If the last parameter of a Command is an Argument, it can be spread.
+If the last parameter of a Command is an Argument, it can be variadic.
 
 [source,php]
 ----

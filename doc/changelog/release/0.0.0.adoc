@@ -5,5 +5,5 @@
 
 * `ConsoleRouter` Error output uses `Pencil`.
 * `ConsoleRouter` parses run command for the application name.
-* Minor code updats and enhancements.
-* If last param of `Command` is `Argument`, it can be spread, `...$property`
+* Minor code updates and enhancements.
+* If last param of `Command` is `Argument`, it can be *variadic*, `...$property`

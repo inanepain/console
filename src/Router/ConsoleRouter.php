@@ -25,12 +25,14 @@ declare(strict_types = 1);
 namespace Inane\Console\Router;
 
 use Exception;
-use Inane\Cli\Cli;
-use Inane\Cli\Pencil;
-use Inane\Cli\Pencil\Colour;
-use Inane\Console\Command\Argument;
-use Inane\Console\Command\Command;
-use Inane\Console\Command\Option;
+use Inane\Cli\{
+    Cli,
+    Pencil,
+    Pencil\Colour};
+use Inane\Console\Command\{
+    Argument,
+    Command,
+    Option};
 use Inane\Stdlib\Array\OptionsInterface;
 use Inane\Stdlib\Exception\RuntimeException;
 use ReflectionClass;
@@ -48,73 +50,14 @@ use function str_starts_with;
 use function substr;
 use const PHP_EOL;
 
-// Exception is the base class for
-// Cli
-// Colour
-// Represents an argument attribute that can be applied to parameters.
-// Represents a command that can be executed, with a name, description,
-// Represents an option that can be used as part of a command-line interface or similar functionality.
-// Interface: Options
-// Exception thrown if an error which can only be found on runtime occurs.
-// @template T of object
-// The ReflectionException class.
-// The <b>ReflectionMethod</b> class reports
-// Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
-// Extract a slice of the array
-// Counts all elements in an array, or something in an object.
-// Split a string by a string
-// Join array elements with a string
-// Find whether the type of a variable is integer
-// Return a formatted string
-// Checks if $needle is found in $haystack and returns a boolean value
-// The function returns {@see true} if the passed $haystack starts from the
-// Return part of a string or false on failure. For PHP8.0+ only string is returned
-
-// Exception is the base class for
-// Cli
-// Colour
-// Represents an argument attribute that can be applied to parameters.
-// Represents a command that can be executed, with a name, description,
-// Represents an option that can be used as part of a command-line interface or similar functionality.
-// Interface: Options
-// Exception thrown if an error which can only be found on runtime occurs.
-// @template T of object
-// The ReflectionException class.
-// The <b>ReflectionMethod</b> class reports
-// Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
-// Extract a slice of the array
-// Counts all elements in an array, or something in an object.
-// Split a string by a string
-// Join array elements with a string
-// Find whether the type of a variable is integer
-// Return a formatted string
-// Checks if $needle is found in $haystack and returns a boolean value
-// The function returns {@see true} if the passed $haystack starts from the
-// Return part of a string or false on failure. For PHP8.0+ only string is returned
-
-// Exception is the base class for
-// Cli
-// Represents an argument attribute that can be applied to parameters.
-// Represents a command that can be executed, with a name, description,
-// Represents an option that can be used as part of a command-line interface or similar functionality.
-// Interface: Options
-// The ReflectionException class.
-// Extract a slice of the array
-// Counts all elements in an array, or something in an object.
-// Split a string by a string
-// Join array elements with a string
-// Find whether the type of a variable is integer
-// Return a formatted string
-// Checks if $needle is found in $haystack and returns a boolean value
-// The function returns {@see true} if the passed $haystack starts from the
-// Return part of a string or false on failure. For PHP8.0+ only string is returned
-
 /**
  * ConsoleRouter
  *
  * Responsible for discovering console commands via attributes on controller
  * methods, routing argv input to the correct handler, and basic parsing of
  * positional arguments and options.
+ *
+ * @version 0.2.0
  */
 class ConsoleRouter {
     //#region Properties
@@ -239,6 +182,8 @@ class ConsoleRouter {
      * - `-s value` for short options
      * - remaining tokens are positional arguments
      *
+     * @since 0.2.0 Handles variadic arguments.
+     *
      * @param string[]                         $argv
      * @param array<int, array<string, mixed>> $params
      *
@@ -261,7 +206,7 @@ class ConsoleRouter {
                 } else {
                     $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
                 }
-            } elseif (str_starts_with($iValue, '-') && $iValue !== '-') {   // The function returns {@see true} if the passed $haystack starts from the
+            } elseif ($iValue !== '-' && str_starts_with($iValue, '-')) {   // The function returns {@see true} if the passed $haystack starts from the
                 // Short option
                 $opt = substr($iValue, 1);   // Return part of a string or false on failure. For PHP8.0+ only string is returned
                 $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
@@ -280,6 +225,7 @@ class ConsoleRouter {
                 if (isset($arguments[$argIndex])) {   // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
                     $result[] = $arguments[$argIndex++];
 
+                    // Handle variadic arguments if it is the last argument.
                     if (count($arguments) > $argIndex) {   // Counts all elements in an array, or something in an object.
                         $result = array_merge($result, array_slice($arguments, $argIndex));   // Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
                     }

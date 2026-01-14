@@ -454,6 +454,58 @@ public function validate(): int
 }
 ----
 
+=== Variadic argument Example
+
+If the last parameter of a Command is an Argument, it can be variadic.
+
+[source,php]
+----
+class Commands {
+    #[Command('brew:attrib', 'Modify package properties', ['bha'])]
+    public function attribCommand(
+        #[Argument('Actions: install, uninstall, flag, unflag, hide, unhide, info', required: true, default: 'info')]
+        string $action = 'info',
+
+        // As manu packages as you wish
+        #[Argument('List of packages', required: true)]
+        string ...$packages,
+    ): int {
+        $formulas = $this->brew->getPackages(...$packages);
+        foreach($formulas as $formula) {
+            Cli::line('Brew package: ' . $formula->name);
+
+            if ($action === 'install') {
+                $formula->installed = true;
+            } elseif ($action === 'uninstall') {
+                $formula->installed = false;
+            } elseif ($action === 'flag') {
+                $formula->flag = true;
+            } elseif ($action === 'unflag') {
+                $formula->flag = false;
+            } elseif ($action === 'hide') {
+                if (!str_contains($formula->tags, 'hide')) {
+                    $tags = explode(',', $formula->tags);
+                    $tags[] = 'hide';
+                    sort($tags);
+                    $formula->tags = implode(',', array_unique($tags));
+                }
+            } elseif ($action === 'unhide') {
+                if (str_contains($formula->tags, 'hide')) {
+                    $tags = explode(',', $formula->tags);
+                    $tags = array_diff($tags, ['hide']);
+                    sort($tags);
+                    $formula->tags = implode(',', array_unique($tags));
+                }
+            } else {
+                $this->printFormula($formula, true);
+            }
+        }
+
+        return 0;
+    }
+}
+----
+
 === Complex Example
 
 A comprehensive example combining all features:
