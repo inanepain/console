@@ -32,6 +32,8 @@ namespace Inane\Console\Command;
  * - name: The name of the command.
  * - description: A brief description of the command's purpose.
  * - aliases: Alternative names for the command.
+ *
+ * @version 0.3.0
  */
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class Command {

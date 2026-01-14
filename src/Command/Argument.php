@@ -30,6 +30,8 @@ namespace Inane\Console\Command;
  * This attribute holds metadata about a parameter, including its description,
  * whether it is required, and its default value.
  *
+ * @version 0.3.0
+ *
  * @param string $description A brief description of the parameter.
  * @param bool   $required    Indicates whether the parameter is mandatory. Default is true.
  * @param mixed  $default     Specifies the default value of the parameter if it is not required.

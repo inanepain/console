@@ -57,7 +57,7 @@ use const PHP_EOL;
  * methods, routing argv input to the correct handler, and basic parsing of
  * positional arguments and options.
  *
- * @version 0.2.0
+ * @version 0.3.0
  */
 class ConsoleRouter {
     //#region Properties
@@ -182,7 +182,7 @@ class ConsoleRouter {
      * - `-s value` for short options
      * - remaining tokens are positional arguments
      *
-     * @since 0.2.0 Handles variadic arguments.
+     * @since 0.3.0 Handles variadic arguments.
      *
      * @param string[]                         $argv
      * @param array<int, array<string, mixed>> $params

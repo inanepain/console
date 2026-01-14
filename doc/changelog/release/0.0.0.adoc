@@ -1,9 +1,4 @@
-= 0.3.0-dev (2025 Dev xx)
-:revnumber: 0.3.0
-:revdate: 2025-12-xx
+= 0.4.0-dev (2026 Feb xx)
+:revnumber: 0.4.0
+:revdate: 2026-02-xx
 :revremark: -dev
-
-* `ConsoleRouter` Error output uses `Pencil`.
-* `ConsoleRouter` parses run command for the application name.
-* Minor code updates and enhancements.
-* If last param of `Command` is `Argument`, it can be *variadic*, `...$property`

@@ -30,6 +30,8 @@ namespace Inane\Console\Command;
  * Options are parameters that provide additional context or behavior for an operation.
  * They may have a name, an optional shortcut, a description, a default value,
  * and an indicator of whether they are valueless.
+ *
+ * @version 0.3.0
  */
 #[\Attribute(\Attribute::TARGET_PARAMETER | \Attribute::IS_REPEATABLE)]
 class Option {

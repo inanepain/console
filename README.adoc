@@ -3,8 +3,8 @@
 :email: <philip@cathedral.co.za>
 :keywords: library,inanepain,composer,php,console,routing,route,router,command,argument
 :description: Console routing and argument handling.
-:revnumber: 0.2.0
-:revdate: 2025-12-08
+:revnumber: 0.3.0
+:revdate: 2026-01-14
 :copyright: Unlicense
 :experimental:
 :hide-uri-scheme:
