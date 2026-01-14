@@ -10,10 +10,10 @@ class DatabaseCommands
 {
     #[Command('db:migrate', 'Run database migrations')]
     public function migrate(): int { /* ... */ }
-    
+
     #[Command('db:seed', 'Seed the database')]
     public function seed(): int { /* ... */ }
-    
+
     #[Command('db:reset', 'Reset the database')]
     public function reset(): int { /* ... */ }
 }
@@ -77,14 +77,66 @@ public function validate(): int
         echo "Error: config.php not found" . PHP_EOL;
         return 1;
     }
-    
+
     if (!$this->isValidConfig()) {
         echo "Error: Invalid configuration" . PHP_EOL;
         return 1;
     }
-    
+
     echo "Configuration is valid!" . PHP_EOL;
     return 0;
+}
+----
+
+=== Spread Example
+
+If the last parameter of a Command is an Argument, it can be spread.
+
+[source,php]
+----
+class Commands {
+    #[Command('brew:attrib', 'Modify package properties', ['bha'])]
+    public function attribCommand(
+        #[Argument('Actions: install, uninstall, flag, unflag, hide, unhide, info', required: true, default: 'info')]
+        string $action = 'info',
+
+        // As manu packages as you wish
+        #[Argument('List of packages', required: true)]
+        string ...$packages,
+    ): int {
+        $formulas = $this->brew->getPackages(...$packages);
+        foreach($formulas as $formula) {
+            Cli::line('Brew package: ' . $formula->name);
+
+            if ($action === 'install') {
+                $formula->installed = true;
+            } elseif ($action === 'uninstall') {
+                $formula->installed = false;
+            } elseif ($action === 'flag') {
+                $formula->flag = true;
+            } elseif ($action === 'unflag') {
+                $formula->flag = false;
+            } elseif ($action === 'hide') {
+                if (!str_contains($formula->tags, 'hide')) {
+                    $tags = explode(',', $formula->tags);
+                    $tags[] = 'hide';
+                    sort($tags);
+                    $formula->tags = implode(',', array_unique($tags));
+                }
+            } elseif ($action === 'unhide') {
+                if (str_contains($formula->tags, 'hide')) {
+                    $tags = explode(',', $formula->tags);
+                    $tags = array_diff($tags, ['hide']);
+                    sort($tags);
+                    $formula->tags = implode(',', array_unique($tags));
+                }
+            } else {
+                $this->printFormula($formula, true);
+            }
+        }
+
+        return 0;
+    }
 }
 ----
 
@@ -100,32 +152,32 @@ class DeployCommands
     public function deployApp(
         #[Argument('Target environment (staging/production)', required: true)]
         string $environment,
-        
+
         #[Argument('Git branch to deploy', required: false, default: 'main')]
         string $branch = 'main',
-        
+
         #[Option('force', 'f', 'Skip safety checks', valueless: true)]
         bool $force = false,
-        
+
         #[Option('rollback', 'r', 'Rollback on failure', valueless: true)]
         bool $rollback = true,
-        
+
         #[Option('timeout', 't', 'Deployment timeout in seconds', 300)]
         int $timeout = 300
     ): int {
         echo "Deploying branch '{$branch}' to {$environment}" . PHP_EOL;
         echo "Timeout: {$timeout}s" . PHP_EOL;
-        
+
         if ($force) {
             echo "⚠️  Skipping safety checks" . PHP_EOL;
         }
-        
+
         if (!$rollback) {
             echo "⚠️  Auto-rollback disabled" . PHP_EOL;
         }
-        
+
         // Deployment logic here...
-        
+
         echo "✓ Deployment successful!" . PHP_EOL;
         return 0;
     }
