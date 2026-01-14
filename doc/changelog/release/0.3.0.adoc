@@ -1,0 +1,8 @@
+= 0.3.0 (2026 Jan 14)
+:revnumber: 0.3.0
+:revdate: 2026-01-14
+
+* `ConsoleRouter` Error output uses `Pencil`.
+* `ConsoleRouter` parses run command for the application name.
+* Minor code updates and enhancements.
+* If last param of `Command` is `Argument`, it can be *variadic*, `...$property`

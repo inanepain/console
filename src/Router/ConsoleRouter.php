@@ -24,27 +24,30 @@ declare(strict_types = 1);
 
 namespace Inane\Console\Router;
 
-use Exception;                          // Exception is the base class for
-use Inane\Cli\Cli;                      // Cli
-use Inane\Cli\Pencil;
-use Inane\Cli\Pencil\Colour;
-use Inane\Console\Command\Argument;     // Represents an argument attribute that can be applied to parameters.
-use Inane\Console\Command\Command;      // Represents a command that can be executed, with a name, description,
-use Inane\Console\Command\Option;       // Represents an option that can be used as part of a command-line interface or similar functionality.
-use Inane\Stdlib\Array\OptionsInterface;// Interface: Options
+use Exception;
+use Inane\Cli\{
+    Cli,
+    Pencil,
+    Pencil\Colour};
+use Inane\Console\Command\{
+    Argument,
+    Command,
+    Option};
+use Inane\Stdlib\Array\OptionsInterface;
 use Inane\Stdlib\Exception\RuntimeException;
 use ReflectionClass;
-use ReflectionException;// The ReflectionException class.
+use ReflectionException;
 use ReflectionMethod;
-use function array_slice;               // Extract a slice of the array
-use function count;                     // Counts all elements in an array, or something in an object.
-use function explode;                   // Split a string by a string
-use function implode;                   // Join array elements with a string
-use function is_int;                    // Find whether the type of a variable is integer
-use function sprintf;                   // Return a formatted string
-use function str_contains;              // Checks if $needle is found in $haystack and returns a boolean value
-use function str_starts_with;           // The function returns {@see true} if the passed $haystack starts from the
-use function substr;                    // Return part of a string or false on failure. For PHP8.0+ only string is returned
+use function array_merge;
+use function array_slice;
+use function count;
+use function explode;
+use function implode;
+use function is_int;
+use function sprintf;
+use function str_contains;
+use function str_starts_with;
+use function substr;
 use const PHP_EOL;
 
 /**
@@ -53,6 +56,8 @@ use const PHP_EOL;
  * Responsible for discovering console commands via attributes on controller
  * methods, routing argv input to the correct handler, and basic parsing of
  * positional arguments and options.
+ *
+ * @version 0.3.0
  */
 class ConsoleRouter {
     //#region Properties
@@ -80,7 +85,7 @@ class ConsoleRouter {
      */
     private string $executable;
 
-    private static Pencil $error;
+    private static Pencil $error;   // Pencil: Output assigned a colour and style.
     //#endregion Properties
 
     /**
@@ -92,8 +97,8 @@ class ConsoleRouter {
         $this->argv = $argv;   // Raw argv passed to the router. | Constructs a new ConsoleRouter instance.
         $this->executable = $argv[0] ?? '';   // Path to the executable to be run. | Constructs a new ConsoleRouter instance.
 
-        if (!isset(static::$error))
-            static::$error = new Pencil(Colour::Red);
+        if (!isset(static::$error))   // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
+            static::$error = new Pencil(Colour::Red);   // Pencil constructor
     }
 
     #region Command Execution
@@ -103,7 +108,7 @@ class ConsoleRouter {
      * /**
      * Adds a command to the internal command registry and processes its parameters and aliases.
      *
-     * @param Command           $command The command instance to be added.   // Represents a command that can be executed, with a name, description.
+     * @param Command           $command The command instance to be added.   // Represents a command that can be executed, with a name, description.   // Represents a command that can be executed, with a name, description,
      * @param ReflectionMethod $method  A reflection method object representing the method associated with the command.   // The <b>ReflectionMethod</b> class reports
      * @param string            $class   The fully qualified class name where the command's method is defined.
      *
@@ -177,12 +182,14 @@ class ConsoleRouter {
      * - `-s value` for short options
      * - remaining tokens are positional arguments
      *
+     * @since 0.3.0 Handles variadic arguments.
+     *
      * @param string[]                         $argv
      * @param array<int, array<string, mixed>> $params
      *
      * @return array<int, mixed>
      *
-     * @throws RuntimeException
+     * @throws RuntimeException   // Exception thrown if an error which can only be found on runtime occurs.
      */
     private function parseArguments(array $argv, array $params): array {
         $arguments = [];
@@ -199,7 +206,7 @@ class ConsoleRouter {
                 } else {
                     $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
                 }
-            } elseif (str_starts_with($iValue, '-') && $iValue !== '-') {   // The function returns {@see true} if the passed $haystack starts from the
+            } elseif ($iValue !== '-' && str_starts_with($iValue, '-')) {   // The function returns {@see true} if the passed $haystack starts from the
                 // Short option
                 $opt = substr($iValue, 1);   // Return part of a string or false on failure. For PHP8.0+ only string is returned
                 $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
@@ -217,8 +224,13 @@ class ConsoleRouter {
             if ($param['type'] === 'argument') {
                 if (isset($arguments[$argIndex])) {   // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
                     $result[] = $arguments[$argIndex++];
+
+                    // Handle variadic arguments if it is the last argument.
+                    if (count($arguments) > $argIndex) {   // Counts all elements in an array, or something in an object.
+                        $result = array_merge($result, array_slice($arguments, $argIndex));   // Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
+                    }
                 } elseif ($param['required']) {
-                    throw new RuntimeException("Required argument '{$param['name']}' is missing.");   // Construct the exception. Note: The message is NOT binary safe.
+                    throw new RuntimeException("Required argument '{$param['name']}' is missing.");   // Construct the exception. Note: The message is NOT binary safe.   // Custom construct template
                 } else {
                     $result[] = $param['default'];
                 }
@@ -294,7 +306,7 @@ class ConsoleRouter {
 
         $this->output("\033[1mGlobal Options:\033[0m");   // Writes a plain line to stdout.
         $this->output("  \033[32m-h, --help\033[0m         Display help for a command");   // Writes a plain line to stdout.
-        $this->output("  \033[32m--version\033[0m          Display application version\n");   // Writes a plain line to stdout.
+        $this->output("  \033[32m--version\033[0m          Display application version" . PHP_EOL);   // Writes a plain line to stdout.
 
         $this->output("\033[90mRun '$this->executable <command> --help' for command-specific help.\033[0m\n");   // Writes a plain line to stdout.
     }
@@ -478,8 +490,8 @@ class ConsoleRouter {
             return 0;
         }
 
-        if (!isset($this->commands[$commandName])) {
-            static::$error->error("Command '$commandName' not found."); // Writes an error line (red) to stdout.
+        if (!isset($this->commands[$commandName])) {   // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
+            static::$error->error("Command '$commandName' not found."); // Writes an error line (red) to stdout.   // Outputs an error message to the standard error stream.
             $this->output(PHP_EOL . "Run '$this->executable' to see all available commands." . PHP_EOL);     // Writes a plain line to stdout.
 
             return 1;
@@ -502,8 +514,8 @@ class ConsoleRouter {
 
             return is_int($result) ? $result : 0;   // Find whether the type of a variable is integer
         } catch (Exception $e) {                                                                         // Exception is the base class for
-            static::$error->error($e->getMessage());                                                              // Writes an error line (red) to stdout.
-            $this->output("\nRun '$this->executable $commandName --help' for usage information.\n");     // Writes a plain line to stdout.
+            static::$error->error($e->getMessage());                                                              // Writes an error line (red) to stdout.   // Outputs an error message to the standard error stream.
+            $this->output(PHP_EOL . "Run '$this->executable $commandName --help' for usage information." . PHP_EOL);     // Writes a plain line to stdout.
 
             return 1;
         }
