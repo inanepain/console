@@ -18,6 +18,14 @@
 
 :leveloffset: +2
 
+= 0.4.0-dev (2026 Feb xx)
+:revnumber: 0.4.0
+:revdate: 2026-02-xx
+:revremark: -dev
+
+:leveloffset!:
+:leveloffset: +2
+
 = 0.3.0 (2026 Jan 14)
 :revnumber: 0.3.0
 :revdate: 2026-01-14
