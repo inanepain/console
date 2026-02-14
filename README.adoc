@@ -1,8 +1,9 @@
-= console
+= inanepain/console image:./icon.png[title=inanepain/console,25]
 :author: Philip Michael Raab
 :email: <philip@cathedral.co.za>
-:keywords: library,inanepain,composer,php,console,routing,route,router,command,argument
 :description: Console routing and argument handling.
+:keywords: library,inanepain,composer,php,console,routing,route,router,command,argument
+:homepage: https://github.com/inanepain/console
 :revnumber: 0.3.0
 :revdate: 2026-01-14
 :copyright: Unlicense
@@ -23,15 +24,15 @@
 
 {description}
 
-:sectnums: |,all|
+:sectnums:
 
 :leveloffset: +1
 
-== Introduction
+= Introduction
 
 The PHP Console Router is a modern, attribute-based command-line application framework for PHP 8+. It provides an elegant way to define CLI commands using PHP attributes, automatic argument parsing, and beautiful help documentation.
 
-=== Features
+== Features
 
 * ✅ Attribute-based command definition
 * ✅ Automatic argument and option parsing
@@ -43,7 +44,7 @@ The PHP Console Router is a modern, attribute-based command-line application fra
 * ✅ Color-coded terminal output
 * ✅ Command grouping by namespace
 
-=== Requirements
+== Requirements
 
 * PHP 8.0 or higher
 * CLI SAPI (command-line interface)
@@ -54,14 +55,14 @@ The PHP Console Router is a modern, attribute-based command-line application fra
 
 :leveloffset: +1
 
-== Install
+= Install
 
 [source,shell]
 ====
 $ composer require {pkg-id}
 ====
 
-=== Basic Setup
+== Basic Setup
 
 .Create your project structure:
 [source,bash]
@@ -95,9 +96,9 @@ chmod +x console.php
 
 :leveloffset: +1
 
-== Quick Start
+= Quick Start
 
-=== Your First Command
+== Your First Command
 
 Create a simple command that greets a user:
 
@@ -141,20 +142,20 @@ php console.php hello John
 
 :leveloffset: +1
 
-== Core Concepts
+= Core Concepts
 
-=== Commands
+== Commands
 
 Commands are defined using the `#[Command]` attribute on public methods.
 
-==== Syntax
+=== Syntax
 
 [source,php]
 ----
 #[Command(string $name, string $description = '', array $aliases = [])]
 ----
 
-==== Parameters
+=== Parameters
 
 [cols="1,1,3"]
 |===
@@ -173,7 +174,7 @@ Commands are defined using the `#[Command]` attribute on public methods.
 |Alternative names for the command
 |===
 
-==== Example
+=== Example
 
 [source,php]
 ----
@@ -194,18 +195,18 @@ php console.php cc        # Using alias
 php console.php clear     # Using alias
 ----
 
-=== Arguments
+== Arguments
 
 Arguments are positional parameters that must be provided in order.
 
-==== Syntax
+=== Syntax
 
 [source,php]
 ----
 #[Argument(string $description = '', bool $required = true, mixed $default = null)]
 ----
 
-==== Parameters
+=== Parameters
 
 [cols="1,1,3"]
 |===
@@ -224,7 +225,7 @@ Arguments are positional parameters that must be provided in order.
 |Default value if not provided
 |===
 
-==== Example
+=== Example
 
 [source,php]
 ----
@@ -252,11 +253,11 @@ php console.php user:create john john@example.com
 php console.php user:create alice alice@example.com admin
 ----
 
-=== Options
+== Options
 
 Options are named parameters that can be provided in any order using `--name` or `-n` syntax.
 
-==== Syntax
+=== Syntax
 
 [source,php]
 ----
@@ -269,7 +270,7 @@ Options are named parameters that can be provided in any order using `--name` or
 )]
 ----
 
-==== Parameters
+=== Parameters
 
 [cols="1,1,3"]
 |===
@@ -296,9 +297,9 @@ Options are named parameters that can be provided in any order using `--name` or
 |True for boolean flags (no value needed)
 |===
 
-==== Option Types
+=== Option Types
 
-===== Value Options
+==== Value Options
 
 Options that accept a value:
 
@@ -325,7 +326,7 @@ php console.php send:email --to=john@example.com --subject="Hello"
 php console.php send:email -t john@example.com -s "Hello"
 ----
 
-===== Boolean Flags
+==== Boolean Flags
 
 Options that don't need a value (valueless):
 
@@ -364,9 +365,9 @@ php console.php deploy --dry-run
 
 :leveloffset: +1
 
-== Advanced Usage
+= Advanced Usage
 
-=== Command Namespacing
+== Command Namespacing
 
 Use colons (`:`) to organize commands into namespaces:
 
@@ -397,7 +398,7 @@ Available Commands:
     db:reset            Reset the database
 ----
 
-=== Multiple Controllers
+== Multiple Controllers
 
 Register multiple command controllers:
 
@@ -410,7 +411,7 @@ $router->register(UserCommands::class);
 exit($router->run());
 ----
 
-=== Exit Codes
+== Exit Codes
 
 Return appropriate exit codes from your commands:
 
@@ -454,7 +455,7 @@ public function validate(): int
 }
 ----
 
-=== Variadic argument Example
+== Variadic argument Example
 
 If the last parameter of a Command is an Argument, it can be variadic.
 
@@ -474,22 +475,22 @@ class Commands {
         foreach($formulas as $formula) {
             Cli::line('Brew package: ' . $formula->name);
 
-            if ($action === 'install') {
+            if ($action == 'install') {
                 $formula->installed = true;
-            } elseif ($action === 'uninstall') {
+            } elseif ($action == 'uninstall') {
                 $formula->installed = false;
-            } elseif ($action === 'flag') {
+            } elseif ($action == 'flag') {
                 $formula->flag = true;
-            } elseif ($action === 'unflag') {
+            } elseif ($action == 'unflag') {
                 $formula->flag = false;
-            } elseif ($action === 'hide') {
+            } elseif ($action == 'hide') {
                 if (!str_contains($formula->tags, 'hide')) {
                     $tags = explode(',', $formula->tags);
                     $tags[] = 'hide';
                     sort($tags);
                     $formula->tags = implode(',', array_unique($tags));
                 }
-            } elseif ($action === 'unhide') {
+            } elseif ($action == 'unhide') {
                 if (str_contains($formula->tags, 'hide')) {
                     $tags = explode(',', $formula->tags);
                     $tags = array_diff($tags, ['hide']);
@@ -506,7 +507,7 @@ class Commands {
 }
 ----
 
-=== Complex Example
+== Complex Example
 
 A comprehensive example combining all features:
 
@@ -576,11 +577,11 @@ php console.php deploy production main --force
 
 :leveloffset: +1
 
-== Help System
+= Help System
 
-=== Viewing Help
+== Viewing Help
 
-==== List All Commands
+=== List All Commands
 
 [source,bash]
 ----
@@ -590,7 +591,7 @@ php console.php --help
 php console.php -h
 ----
 
-==== Command-Specific Help
+=== Command-Specific Help
 
 [source,bash]
 ----
@@ -623,7 +624,7 @@ Options:
   -h, --help           Display help for this command
 ----
 
-=== Version Information
+== Version Information
 
 [source,bash]
 ----
@@ -636,16 +637,16 @@ php console.php --version
 
 :leveloffset: +1
 
-== Best Practices
+= Best Practices
 
-=== Command Design
+== Command Design
 
 . **Use descriptive names**: `user:create` instead of `ucreate`
 . **Group related commands**: Use namespaces (`cache:clear`, `cache:warm`)
 . **Keep commands focused**: One command = one task
 . **Provide clear descriptions**: Help users understand what each command does
 
-=== Error Handling
+== Error Handling
 
 Always handle errors gracefully:
 
@@ -672,7 +673,7 @@ public function processFile(
 }
 ----
 
-=== User Feedback
+== User Feedback
 
 Provide clear feedback to users:
 
@@ -692,7 +693,7 @@ public function importData(
         $this->importRow($row);
 
         // Progress indicator
-        if (($i + 1) % 100 === 0) {
+        if (($i + 1) % 100 == 0) {
             echo "Imported " . ($i + 1) . " / {$total} rows..." . PHP_EOL;
         }
     }
@@ -708,13 +709,13 @@ public function importData(
 
 :leveloffset: +1
 
-== API Reference
+= API Reference
 
-=== ConsoleRouter Class
+== ConsoleRouter Class
 
-==== Methods
+=== Methods
 
-===== `__construct(array $argv = [])`
+==== `__construct(array $argv = [])`
 
 Initialize the router with command-line arguments.
 
@@ -723,7 +724,7 @@ Initialize the router with command-line arguments.
 $router = new ConsoleRouter($argv);
 ----
 
-===== `register(string $controllerClass): void`
+==== `register(string $controllerClass): void`
 
 Register a controller class containing commands.
 
@@ -732,7 +733,7 @@ Register a controller class containing commands.
 $router->register(AppCommands::class);
 ----
 
-===== `run(): int`
+==== `run(): int`
 
 Execute the router and return exit code.
 
@@ -741,7 +742,7 @@ Execute the router and return exit code.
 exit($router->run());
 ----
 
-===== `getCommands(): array`
+==== `getCommands(): array`
 
 Get all registered commands (useful for debugging).
 
@@ -757,11 +758,11 @@ var_dump($commands);
 
 :leveloffset: +1
 
-== Troubleshooting
+= Troubleshooting
 
-=== Common Issues
+== Common Issues
 
-==== "Command not found"
+=== "Command not found"
 
 **Problem**: Command doesn't appear in the list
 
@@ -772,7 +773,7 @@ var_dump($commands);
 * Verify the `#[Command]` attribute syntax
 * Make sure PHP 8.0+ is being used
 
-==== "Required argument missing"
+=== "Required argument missing"
 
 **Problem**: Error when running command
 
@@ -782,7 +783,7 @@ var_dump($commands);
 * Verify `required: true` is set correctly
 * Provide all required arguments when calling
 
-==== Colors not showing
+=== Colors not showing
 
 **Problem**: Terminal output has escape codes instead of colors
 
@@ -798,9 +799,9 @@ var_dump($commands);
 
 :leveloffset: +1
 
-== Examples Repository
+= Examples Repository
 
-=== Task Management CLI
+== Task Management CLI
 
 [source,php]
 ----

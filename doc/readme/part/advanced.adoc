@@ -1,6 +1,6 @@
-== Advanced Usage
+= Advanced Usage
 
-=== Command Namespacing
+== Command Namespacing
 
 Use colons (`:`) to organize commands into namespaces:
 
@@ -31,7 +31,7 @@ Available Commands:
     db:reset            Reset the database
 ----
 
-=== Multiple Controllers
+== Multiple Controllers
 
 Register multiple command controllers:
 
@@ -44,7 +44,7 @@ $router->register(UserCommands::class);
 exit($router->run());
 ----
 
-=== Exit Codes
+== Exit Codes
 
 Return appropriate exit codes from your commands:
 
@@ -88,7 +88,7 @@ public function validate(): int
 }
 ----
 
-=== Variadic argument Example
+== Variadic argument Example
 
 If the last parameter of a Command is an Argument, it can be variadic.
 
@@ -108,22 +108,22 @@ class Commands {
         foreach($formulas as $formula) {
             Cli::line('Brew package: ' . $formula->name);
 
-            if ($action === 'install') {
+            if ($action == 'install') {
                 $formula->installed = true;
-            } elseif ($action === 'uninstall') {
+            } elseif ($action == 'uninstall') {
                 $formula->installed = false;
-            } elseif ($action === 'flag') {
+            } elseif ($action == 'flag') {
                 $formula->flag = true;
-            } elseif ($action === 'unflag') {
+            } elseif ($action == 'unflag') {
                 $formula->flag = false;
-            } elseif ($action === 'hide') {
+            } elseif ($action == 'hide') {
                 if (!str_contains($formula->tags, 'hide')) {
                     $tags = explode(',', $formula->tags);
                     $tags[] = 'hide';
                     sort($tags);
                     $formula->tags = implode(',', array_unique($tags));
                 }
-            } elseif ($action === 'unhide') {
+            } elseif ($action == 'unhide') {
                 if (str_contains($formula->tags, 'hide')) {
                     $tags = explode(',', $formula->tags);
                     $tags = array_diff($tags, ['hide']);
@@ -140,7 +140,7 @@ class Commands {
 }
 ----
 
-=== Complex Example
+== Complex Example
 
 A comprehensive example combining all features:
 

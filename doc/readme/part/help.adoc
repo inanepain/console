@@ -1,8 +1,8 @@
-== Help System
+= Help System
 
-=== Viewing Help
+== Viewing Help
 
-==== List All Commands
+=== List All Commands
 
 [source,bash]
 ----
@@ -12,7 +12,7 @@ php console.php --help
 php console.php -h
 ----
 
-==== Command-Specific Help
+=== Command-Specific Help
 
 [source,bash]
 ----
@@ -45,7 +45,7 @@ Options:
   -h, --help           Display help for this command
 ----
 
-=== Version Information
+== Version Information
 
 [source,bash]
 ----

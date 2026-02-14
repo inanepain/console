@@ -1,6 +1,6 @@
-== Quick Start
+= Quick Start
 
-=== Your First Command
+== Your First Command
 
 Create a simple command that greets a user:
 

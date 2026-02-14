@@ -1,6 +1,6 @@
-== Examples Repository
+= Examples Repository
 
-=== Task Management CLI
+== Task Management CLI
 
 [source,php]
 ----
@@ -10,17 +10,17 @@ class TaskCommands
     public function add(
         #[Argument('Task description')]
         string $description,
-        
+
         #[Option('priority', 'p', 'Task priority (1-5)', 3)]
         int $priority = 3,
-        
+
         #[Option('due', 'd', 'Due date (YYYY-MM-DD)')]
         ?string $dueDate = null
     ): int {
         // Add task logic
         return 0;
     }
-    
+
     #[Command('task:list', 'List all tasks', ['tasks'])]
     public function list(
         #[Option('completed', 'c', 'Show completed tasks', valueless: true)]
@@ -29,7 +29,7 @@ class TaskCommands
         // List tasks logic
         return 0;
     }
-    
+
     #[Command('task:complete', 'Mark task as complete')]
     public function complete(
         #[Argument('Task ID')]

@@ -1,11 +1,11 @@
-== Install
+= Install
 
 [source,shell]
 ====
 $ composer require {pkg-id}
 ====
 
-=== Basic Setup
+== Basic Setup
 
 .Create your project structure:
 [source,bash]

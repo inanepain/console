@@ -1,8 +1,8 @@
-== Troubleshooting
+= Troubleshooting
 
-=== Common Issues
+== Common Issues
 
-==== "Command not found"
+=== "Command not found"
 
 **Problem**: Command doesn't appear in the list
 
@@ -13,7 +13,7 @@
 * Verify the `#[Command]` attribute syntax
 * Make sure PHP 8.0+ is being used
 
-==== "Required argument missing"
+=== "Required argument missing"
 
 **Problem**: Error when running command
 
@@ -23,7 +23,7 @@
 * Verify `required: true` is set correctly
 * Provide all required arguments when calling
 
-==== Colors not showing
+=== Colors not showing
 
 **Problem**: Terminal output has escape codes instead of colors
 

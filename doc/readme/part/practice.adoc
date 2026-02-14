@@ -1,13 +1,13 @@
-== Best Practices
+= Best Practices
 
-=== Command Design
+== Command Design
 
 . **Use descriptive names**: `user:create` instead of `ucreate`
 . **Group related commands**: Use namespaces (`cache:clear`, `cache:warm`)
 . **Keep commands focused**: One command = one task
 . **Provide clear descriptions**: Help users understand what each command does
 
-=== Error Handling
+== Error Handling
 
 Always handle errors gracefully:
 
@@ -22,7 +22,7 @@ public function processFile(
         echo "Error: File not found: {$path}" . PHP_EOL;
         return 1;
     }
-    
+
     try {
         // Process file...
         echo "File processed successfully" . PHP_EOL;
@@ -34,7 +34,7 @@ public function processFile(
 }
 ----
 
-=== User Feedback
+== User Feedback
 
 Provide clear feedback to users:
 
@@ -46,19 +46,19 @@ public function importData(
     string $file
 ): int {
     echo "Starting import from {$file}..." . PHP_EOL;
-    
+
     $rows = $this->readCsv($file);
     $total = count($rows);
-    
+
     foreach ($rows as $i => $row) {
         $this->importRow($row);
-        
+
         // Progress indicator
-        if (($i + 1) % 100 === 0) {
+        if (($i + 1) % 100 == 0) {
             echo "Imported " . ($i + 1) . " / {$total} rows..." . PHP_EOL;
         }
     }
-    
+
     echo "✓ Import complete! {$total} rows imported." . PHP_EOL;
     return 0;
 }
