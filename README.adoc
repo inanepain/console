@@ -57,10 +57,11 @@ The PHP Console Router is a modern, attribute-based command-line application fra
 
 = Install
 
-[source,shell]
-====
-$ composer require {pkg-id}
-====
+.composer
+[source,shell,subs=attributes+]
+----
+composer require {pkg-id}
+----
 
 == Basic Setup
 
