@@ -38,16 +38,24 @@ use Inane\Stdlib\Exception\RuntimeException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+
+use function array_filter;
 use function array_merge;
 use function array_slice;
 use function count;
 use function explode;
 use function implode;
+use function in_array;
+use function is_array;
 use function is_int;
+use function is_numeric;
+use function is_string;
+use function ksort;
 use function sprintf;
 use function str_contains;
 use function str_starts_with;
 use function substr;
+
 use const PHP_EOL;
 
 /**
@@ -72,12 +80,14 @@ class ConsoleRouter {
      * }>
      */
     private array $commands = [];
+
     /**
      * Raw argv passed to the router.
      *
      * @var string[]
      */
     private array $argv;
+
     /**
      * Path to the executable to be run.
      *
@@ -86,6 +96,7 @@ class ConsoleRouter {
     private string $executable;
 
     private static Pencil $error;   // Pencil: Output assigned a colour and style.
+
     //#endregion Properties
 
     /**
@@ -94,7 +105,7 @@ class ConsoleRouter {
      * @param string[] $argv command line arguments, typically from `$argv`
      */
     public function __construct(array $argv = []) {
-        $this->argv = $argv;   // Raw argv passed to the router. | Constructs a new ConsoleRouter instance.
+        $this->argv = $argv;                  // Raw argv passed to the router. | Constructs a new ConsoleRouter instance.
         $this->executable = $argv[0] ?? '';   // Path to the executable to be run. | Constructs a new ConsoleRouter instance.
 
         if (!isset(static::$error))   // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
@@ -104,28 +115,30 @@ class ConsoleRouter {
     #region Command Execution
 
     /**
-     * Executes a registered command with the given arguments.
-     * /**
      * Adds a command to the internal command registry and processes its parameters and aliases.
      *
-     * @param Command           $command The command instance to be added.   // Represents a command that can be executed, with a name, description.   // Represents a command that can be executed, with a name, description,
+     * @param Command          $command The command instance to be added.   // Represents a command that can be executed, with a name, description.   // Represents a command that can be executed, with a name, description,
      * @param ReflectionMethod $method  A reflection method object representing the method associated with the command.   // The <b>ReflectionMethod</b> class reports
-     * @param string            $class   The fully qualified class name where the command's method is defined.
+     * @param string           $class   The fully qualified class name where the command's method is defined.
      *
      * @return void
      */
-    private function addCommand(Command $command, ReflectionMethod $method, string $class): void {   // Represents a command that can be executed, with a name, description, | The <b>ReflectionMethod</b> class reports
+    private function addCommand(Command $command, ReflectionMethod $method, string $class,
+    ): void {                                              // Represents a command that can be executed, with a name, description, | The <b>ReflectionMethod</b> class reports
         $params = $this->parseMethodParameters($method);   // Parses the parameters of the given ReflectionMethod and extracts metadata
 
         $this->commands[$command->name] = [   // Registered commands map. | The name of the command.
-            'command' => $command,   // Executes a registered command with the given arguments.
-            'class'   => $class,   // Executes a registered command with the given arguments.
-            'method'  => $method->getName(),   // Gets function name
-            'params'  => $params,
+                                              'command' => $command,
+                                              // Executes a registered command with the given arguments.
+                                              'class'   => $class,
+                                              // Executes a registered command with the given arguments.
+                                              'method'  => $method->getName(),
+                                              // Gets function name
+                                              'params'  => $params,
         ];
 
         // Register aliases
-        foreach($command->aliases as $alias) {   // Alternative names for the command.
+        foreach($command->aliases as $alias) {                            // Alternative names for the command.
             $this->commands[$alias] = &$this->commands[$command->name];   // Registered commands map. | The name of the command.
         }
     }
@@ -144,26 +157,30 @@ class ConsoleRouter {
     private function parseMethodParameters(ReflectionMethod $method): array {   // The <b>ReflectionMethod</b> class reports
         $params = [];
 
-        foreach($method->getParameters() as $param) {   // Gets parameters
+        foreach($method->getParameters() as $param) {             // Gets parameters
             $argAttrs = $param->getAttributes(Argument::class);   // @template T
-            $optAttrs = $param->getAttributes(Option::class);   // @template T
+            $optAttrs = $param->getAttributes(Option::class);     // @template T
 
-            if (!empty($argAttrs)) {   // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
+            if (!empty($argAttrs)) {                  // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
                 $arg = $argAttrs[0]->newInstance();   // Creates a new instance of the attribute with passed arguments
                 $params[] = [
                     'type'        => 'argument',
-                    'name'        => $param->getName(),   // Gets parameter name
+                    'name'        => $param->getName(),
+                    // Gets parameter name
                     'required'    => $arg->required,
-                    'default'     => $arg->default ?? ($param->isDefaultValueAvailable() ? $param->getDefaultValue() : null),   // Checks if a default value is available | Gets default parameter value
+                    'default'     => $arg->default ?? ($param->isDefaultValueAvailable() ? $param->getDefaultValue() : null),
+                    // Checks if a default value is available | Gets default parameter value
                     'description' => $arg->description,
                 ];
-            } elseif (!empty($optAttrs)) {   // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
+            } elseif (!empty($optAttrs)) {            // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
                 $opt = $optAttrs[0]->newInstance();   // Creates a new instance of the attribute with passed arguments
                 $params[] = [
                     'type'        => 'option',
-                    'name'        => $opt->name ?: $param->getName(),   // Gets parameter name
+                    'name'        => $opt->name ?: $param->getName(),
+                    // Gets parameter name
                     'shortcut'    => $opt->shortcut,
-                    'default'     => $opt->default ?? ($param->isDefaultValueAvailable() ? $param->getDefaultValue() : null),   // Checks if a default value is available | Gets default parameter value
+                    'default'     => $opt->default ?? ($param->isDefaultValueAvailable() ? $param->getDefaultValue() : null),
+                    // Checks if a default value is available | Gets default parameter value
                     'description' => $opt->description,
                     'valueless'   => $opt->valueless,
                 ];
@@ -199,20 +216,25 @@ class ConsoleRouter {
         foreach($argv as $i => $iValue) {   // Parses argv into a final ordered argument list based on the parameter
             if (str_starts_with($iValue, '--')) {   // The function returns {@see true} if the passed $haystack starts from the
                 // Long option
-                $opt = substr($iValue, 2);   // Return part of a string or false on failure. For PHP8.0+ only string is returned
+                $opt = substr($iValue, 2);          // Return part of a string or false on failure. For PHP8.0+ only string is returned
                 if (str_contains($opt, '=')) {   // Checks if $needle is found in $haystack and returns a boolean value
-                    [$key, $value] = explode('=', $opt, 2);   // Split a string by a string
-                    $options[$key] = $value;
+                    [
+                        $key,
+                        $value,
+                    ] = explode('=', $opt, 2);   // Split a string by a string
+                    $options[$key] = is_numeric($value) ? (int)$value : $value;
                 } else {
-                    $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
+                    $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1],
+                        '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
                 }
             } elseif ($iValue !== '-' && str_starts_with($iValue, '-')) {   // The function returns {@see true} if the passed $haystack starts from the
                 // Short option
-                $opt = substr($iValue, 1);   // Return part of a string or false on failure. For PHP8.0+ only string is returned
-                $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
+                $opt = substr($iValue, 1);                                  // Return part of a string or false on failure. For PHP8.0+ only string is returned
+                $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1],
+                    '-') ? $argv[++$i] : true;                              // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
             } else {
                 // Positional argument
-                $arguments[] = $iValue;
+                $arguments[] = is_numeric($iValue) ? (int)$iValue : $iValue;
             }
         }
 
@@ -227,7 +249,8 @@ class ConsoleRouter {
 
                     // Handle variadic arguments if it is the last argument.
                     if (count($arguments) > $argIndex) {   // Counts all elements in an array, or something in an object.
-                        $result = array_merge($result, array_slice($arguments, $argIndex));   // Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
+                        $result = array_merge($result, array_slice($arguments,
+                            $argIndex));                   // Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
                     }
                 } elseif ($param['required']) {
                     throw new RuntimeException("Required argument '{$param['name']}' is missing.");   // Construct the exception. Note: The message is NOT binary safe.   // Custom construct template
@@ -273,14 +296,14 @@ class ConsoleRouter {
      */
     private function showHelp(?string $commandName = null): void {
         if ($commandName && isset($this->commands[$commandName])) {   // Displays help information for available commands or a specific command if provided. | <p>Determine if a variable is set and is not <b>NULL</b>.</p>
-            $this->showCommandHelp($commandName);   // Displays the help information for a specific command, including its
+            $this->showCommandHelp($commandName);                     // Displays the help information for a specific command, including its
 
             return;
         }
 
-        $this->output("\n\033[33m╔══════════════════════════════════════════════════════════════╗\033[0m");   // Writes a plain line to stdout.
+        $this->output("\n\033[33m╔══════════════════════════════════════════════════════════════╗\033[0m");                              // Writes a plain line to stdout.
         $this->output("\033[33m║\033[0m                    \033[1mPHP Console Application\033[0m                   \033[33m║\033[0m");   // Writes a plain line to stdout.
-        $this->output("\033[33m╚══════════════════════════════════════════════════════════════╝\033[0m\n");   // Writes a plain line to stdout.
+        $this->output("\033[33m╚══════════════════════════════════════════════════════════════╝\033[0m\n");                              // Writes a plain line to stdout.
 
         $this->output("\033[1mUsage:\033[0m");                                    // Writes a plain line to stdout.
         $this->output("  $this->executable <command> [arguments] [options]\n");   // Writes a plain line to stdout.
@@ -288,7 +311,7 @@ class ConsoleRouter {
         $this->output("\033[1mAvailable Commands:\033[0m\n");   // Writes a plain line to stdout.
 
         // Group commands by prefix
-        $grouped = $this->groupCommands();   // Groups commands by their namespace.
+        $grouped = $this->groupCommands();                      // Groups commands by their namespace.
 
         foreach($grouped as $group => $commands) {
             if ($group !== '_default') {
@@ -296,7 +319,8 @@ class ConsoleRouter {
             }
 
             foreach($commands as $cmd) {
-                $aliases = !empty($cmd['command']->aliases) ? " \033[90m[" . implode('|', $cmd['command']->aliases) . "]\033[0m" : '';   // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value | Join array elements with a string
+                $aliases = !empty($cmd['command']->aliases) ? " \033[90m[" . implode('|',
+                        $cmd['command']->aliases) . "]\033[0m" : '';   // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value | Join array elements with a string
 
                 $this->output(sprintf("    \033[32m%-18s\033[0m %s%s", $cmd['command']->name, $cmd['command']->description, $aliases));   // Writes a plain line to stdout.
             }
@@ -304,8 +328,8 @@ class ConsoleRouter {
             $this->output('');   // Writes a plain line to stdout.
         }
 
-        $this->output("\033[1mGlobal Options:\033[0m");   // Writes a plain line to stdout.
-        $this->output("  \033[32m-h, --help\033[0m         Display help for a command");   // Writes a plain line to stdout.
+        $this->output("\033[1mGlobal Options:\033[0m");                                               // Writes a plain line to stdout.
+        $this->output("  \033[32m-h, --help\033[0m         Display help for a command");              // Writes a plain line to stdout.
         $this->output("  \033[32m--version\033[0m          Display application version" . PHP_EOL);   // Writes a plain line to stdout.
 
         $this->output("\033[90mRun '$this->executable <command> --help' for command-specific help.\033[0m\n");   // Writes a plain line to stdout.
@@ -342,13 +366,13 @@ class ConsoleRouter {
         $this->output("  $usage\n");             // Writes a plain line to stdout.
 
         // Show aliases
-        if (!empty($cmd['command']->aliases)) {   // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
-            $this->output("\033[1mAliases:\033[0m");   // Writes a plain line to stdout.
+        if (!empty($cmd['command']->aliases)) {                                     // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
+            $this->output("\033[1mAliases:\033[0m");                                // Writes a plain line to stdout.
             $this->output('  ' . implode(', ', $cmd['command']->aliases) . "\n");   // Writes a plain line to stdout.
         }
 
         // Show arguments
-        if (!empty($arguments)) {   // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
+        if (!empty($arguments)) {                        // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
             $this->output("\033[1mArguments:\033[0m");   // Writes a plain line to stdout.
             foreach($arguments as $arg) {
                 $required = $arg['required'] ? "\033[31m[required]\033[0m" : "\033[90m[optional]\033[0m";
@@ -360,7 +384,7 @@ class ConsoleRouter {
         }
 
         // Show options
-        if (!empty($options)) {   // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
+        if (!empty($options)) {                        // Determine whether a variable is considered to be empty. A variable is considered empty if it does not exist or if its value
             $this->output("\033[1mOptions:\033[0m");   // Writes a plain line to stdout.
             foreach($options as $opt) {
                 $short = $opt['shortcut'] ? "-{$opt['shortcut']}, " : '    ';
@@ -398,7 +422,7 @@ class ConsoleRouter {
             }
 
             // Check if command has namespace (contains :)
-            if (str_contains($name, ':')) {   // Checks if $needle is found in $haystack and returns a boolean value
+            if (str_contains($name, ':')) {           // Checks if $needle is found in $haystack and returns a boolean value
                 [$group,] = explode(':', $name, 2);   // Split a string by a string
                 if (!isset($grouped[$group])) {   // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
                     $grouped[$group] = [];
@@ -430,7 +454,7 @@ class ConsoleRouter {
      * Registers all public methods on the given controller class that are
      * annotated with the `Command` attribute.
      *
-     * @param OptionsInterface|class-string|class-string[] $controllerClasses   // Interface: Options
+     * @param OptionsInterface|class-string|class-string[] $controllerClasses // Interface: Options
      *
      * @throws ReflectionException   // The ReflectionException class.
      */
@@ -457,26 +481,31 @@ class ConsoleRouter {
             $commandAttrs = $method->getAttributes(Command::class);                  // @template T
 
             foreach($commandAttrs as $attr) {
-                /** @var Command $command */   // Represents a command that can be executed, with a name, description,
-                $command = $attr->newInstance();   // @var Command $command | Creates a new instance of the attribute with passed arguments
+                /** @var Command $command */                              // Represents a command that can be executed, with a name, description,
+                $command = $attr->newInstance();                          // @var Command $command | Creates a new instance of the attribute with passed arguments
                 $this->addCommand($command, $method, $controllerClass);   // Executes a registered command with the given arguments.
             }
         }
     }
 
     /**
-     * Executes the router using the provided argv and returns the exit code.
+     * Matches the provided command-line arguments to a registered command and executes associated functionality.
      *
-     * @throws Exception   // Exception is the base class for
+     * Processes the arguments passed via the command line and determines if a valid command is provided.
+     * If no valid command is found, appropriate help or error messages are displayed.
+     * Returns command information or execution status code depending on the input.
+     *
+     * @return int|array Returns 0 for successful command execution, 1 for error cases,
+     *                   or an array containing the matched command name, command details, and additional arguments.
      */
-    public function run(): int {
+    public function match(): int|array {
         if (count($this->argv) < 2) {   // Counts all elements in an array, or something in an object.
-            $this->showHelp();   // Displays help information for available commands or a specific command if provided.
+            $this->showHelp();          // Displays help information for available commands or a specific command if provided.
 
             return 0;
         }
 
-        $commandName = $this->argv[1];   // Raw argv passed to the router.
+        $commandName = $this->argv[1];            // Raw argv passed to the router.
 
         if ($commandName === 'list' || $commandName === '--help' || $commandName === '-h') {
             $this->showHelp();   // Displays help information for available commands or a specific command if provided.
@@ -490,8 +519,8 @@ class ConsoleRouter {
             return 0;
         }
 
-        if (!isset($this->commands[$commandName])) {   // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
-            static::$error->error("Command '$commandName' not found."); // Writes an error line (red) to stdout.   // Outputs an error message to the standard error stream.
+        if (!isset($this->commands[$commandName])) {                                                         // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
+            static::$error->error("Command '$commandName' not found.");                                      // Writes an error line (red) to stdout.   // Outputs an error message to the standard error stream.
             $this->output(PHP_EOL . "Run '$this->executable' to see all available commands." . PHP_EOL);     // Writes a plain line to stdout.
 
             return 1;
@@ -500,12 +529,37 @@ class ConsoleRouter {
         // Check for command-specific help
         $cmdArgs = array_slice($this->argv, 2);   // Extract a slice of the array
         if (in_array('--help', $cmdArgs) || in_array('-h', $cmdArgs)) {   // Checks if a value exists in an array
-            $this->showHelp($commandName);   // Displays help information for available commands or a specific command if provided.
+            $this->showHelp($commandName);                                // Displays help information for available commands or a specific command if provided.
 
             return 0;
         }
 
-        $cmd = $this->commands[$commandName];   // Registered commands map.
+        $cmd = $this->commands[$commandName];
+
+        return [
+            $commandName,
+            $cmd,
+            $cmdArgs,
+        ];
+    }
+
+    /**
+     * Executes the router using the provided argv and returns the exit code.
+     *
+     * @throws Exception   // Exception is the base class for
+     */
+    public function run(): int {
+        $match = $this->match();
+
+        if (!is_array($match)) {
+            return $match;
+        } else {
+            [
+                $commandName,
+                $cmd,
+                $cmdArgs,
+            ] = $match;
+        }
 
         try {
             $args = $this->parseArguments($cmdArgs, $cmd['params']);   // Parses argv into a final ordered argument list based on the parameter
@@ -513,8 +567,8 @@ class ConsoleRouter {
             $result = $controller->{$cmd['method']}(...$args);
 
             return is_int($result) ? $result : 0;   // Find whether the type of a variable is integer
-        } catch (Exception $e) {                                                                         // Exception is the base class for
-            static::$error->error($e->getMessage());                                                              // Writes an error line (red) to stdout.   // Outputs an error message to the standard error stream.
+        } catch (Exception $e) {                                                                                         // Exception is the base class for
+            static::$error->error($e->getMessage());                                                                     // Writes an error line (red) to stdout.   // Outputs an error message to the standard error stream.
             $this->output(PHP_EOL . "Run '$this->executable $commandName --help' for usage information." . PHP_EOL);     // Writes a plain line to stdout.
 
             return 1;
