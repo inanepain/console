@@ -213,25 +213,24 @@ class ConsoleRouter {
         $options = [];
 
         // Separate arguments and options
-        foreach($argv as $i => $iValue) {   // Parses argv into a final ordered argument list based on the parameter
+        // Parses argv into a final ordered argument list based on the parameter
+        for($i = 0, $iMax = count($argv); $i < $iMax; $i++) { // need to use a for loop so $i can be manually incremented inside to loop.
+            $iValue = $argv[$i];
             if (str_starts_with($iValue, '--')) {   // The function returns {@see true} if the passed $haystack starts from the
                 // Long option
                 $opt = substr($iValue, 2);          // Return part of a string or false on failure. For PHP8.0+ only string is returned
                 if (str_contains($opt, '=')) {   // Checks if $needle is found in $haystack and returns a boolean value
-                    [
-                        $key,
-                        $value,
-                    ] = explode('=', $opt, 2);   // Split a string by a string
+                    [$key, $value,] = explode('=', $opt, 2);   // Split a string by a string
                     $options[$key] = is_numeric($value) ? (int)$value : $value;
                 } else {
-                    $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1],
-                        '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
+                    $v = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
+                    $options[$opt] = is_numeric($v) ? (int)$v : $v;
                 }
             } elseif ($iValue !== '-' && str_starts_with($iValue, '-')) {   // The function returns {@see true} if the passed $haystack starts from the
                 // Short option
                 $opt = substr($iValue, 1);                                  // Return part of a string or false on failure. For PHP8.0+ only string is returned
-                $options[$opt] = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1],
-                    '-') ? $argv[++$i] : true;                              // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
+                $v = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;                              // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
+                $options[$opt] = is_numeric($v) ? (int)$v : $v;
             } else {
                 // Positional argument
                 $arguments[] = is_numeric($iValue) ? (int)$iValue : $iValue;
@@ -249,8 +248,7 @@ class ConsoleRouter {
 
                     // Handle variadic arguments if it is the last argument.
                     if (count($arguments) > $argIndex) {   // Counts all elements in an array, or something in an object.
-                        $result = array_merge($result, array_slice($arguments,
-                            $argIndex));                   // Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
+                        $result = array_merge($result, array_slice($arguments, $argIndex));                   // Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
                     }
                 } elseif ($param['required']) {
                     throw new RuntimeException("Required argument '{$param['name']}' is missing.");   // Construct the exception. Note: The message is NOT binary safe.   // Custom construct template
@@ -553,13 +551,13 @@ class ConsoleRouter {
 
         if (!is_array($match)) {
             return $match;
-        } else {
-            [
-                $commandName,
-                $cmd,
-                $cmdArgs,
-            ] = $match;
         }
+
+        [
+            $commandName,
+            $cmd,
+            $cmdArgs,
+        ] = $match;
 
         try {
             $args = $this->parseArguments($cmdArgs, $cmd['params']);   // Parses argv into a final ordered argument list based on the parameter
