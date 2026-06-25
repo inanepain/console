@@ -40,3 +40,45 @@ Get all registered commands (useful for debugging).
 $commands = $router->getCommands();
 var_dump($commands);
 ----
+
+== Select Control
+
+The `Inane\Console\Control\Select\Select` control renders an interactive
+terminal menu and returns either a `SelectOption` instance or only the selected
+index/value.
+
+=== `__construct(array $items, string $prompt = 'Use ↑/↓ to navigate, Enter to select', ?string $menuOptionFormat = null, bool $returnIndexOnly = false, ?Screen $screen = null)`
+
+Create a Select control with scalar items or `SelectOption` objects.
+
+[source,php]
+----
+use Inane\Console\Control\Select\Select;
+
+$select = new Select([
+    'Create',
+    'Update',
+    'Delete',
+]);
+----
+
+=== `display(?bool $returnIndexOnly = null): null|bool|int|float|string|SelectOption`
+
+Display the menu and return the selected option (or selected index/value when
+`$returnIndexOnly` is enabled).
+
+[source,php]
+----
+$selectedOption = $select->display();
+
+$selectedIndex = $select->display(true);
+----
+
+=== `__invoke(?bool $returnIndexOnly = null): null|bool|int|float|string|SelectOption`
+
+Call the control directly as a function; this is an alias for `display()`.
+
+[source,php]
+----
+$selected = $select();
+----

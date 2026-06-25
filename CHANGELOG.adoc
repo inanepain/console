@@ -23,6 +23,8 @@
 :revdate: 2026-02-xx
 :revremark: -dev
 
+* new: Control: `Select` - uses arrow keys to select menu item.
+
 :leveloffset!:
 :leveloffset: +2
 
