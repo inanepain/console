@@ -1,0 +1,5 @@
+= 0.4.0 (2026 Jun 25)
+:revnumber: 0.4.0
+:revdate: 2026-06-25
+
+* new: Control: `Select` - uses arrow keys to select menu item.
