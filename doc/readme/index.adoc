@@ -60,6 +60,10 @@ include::./part/api.adoc[leveloffset=+1]
 
 <<<
 
+include::./part/select.adoc[leveloffset=+1]
+
+<<<
+
 include::./part/trouble.adoc[leveloffset=+1]
 
 <<<

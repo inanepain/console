@@ -803,6 +803,78 @@ $selected = $select();
 
 :leveloffset: +1
 
+= Select Control
+
+`Inane\Console\Control\Select\Select` renders an interactive terminal menu
+for choosing one item from a list.
+
+== Constructor
+
+`__construct(array $items, string $prompt = 'Use ↑/↓ to navigate, Enter to select', ?string $menuOptionFormat = null, bool $returnIndexOnly = false, ?Screen $screen = null)`
+
+* `$items`: Menu items as scalar values or `SelectOption` objects.
+* `$prompt`: Prompt shown under the menu.
+* `$menuOptionFormat`: Optional format override for item display.
+* `$returnIndexOnly`: Return index/value instead of `SelectOption`.
+* `$screen`: Optional `Screen` instance.
+
+NOTE: The control requires at least one item; an empty list throws a
+configuration exception.
+
+[source,php]
+----
+use Inane\Console\Control\Select\Select;
+
+$select = new Select([
+    'Create',
+    'Update',
+    'Delete',
+]);
+----
+
+== Display and selection
+
+`display(?bool $returnIndexOnly = null): null|bool|int|float|string|SelectOption`
+
+Shows the interactive menu and returns the selected item.
+
+[source,php]
+----
+$selectedOption = $select->display();
+
+echo $selectedOption->index; // 1-based index for list items
+echo $selectedOption->value;
+----
+
+Use `$returnIndexOnly` when only the selected key/index is needed:
+
+[source,php]
+----
+$select = new Select([
+    'create' => 'Create',
+    'delete' => 'Delete',
+], returnIndexOnly: true);
+
+$selectedKey = $select->display(); // "create" or "delete"
+----
+
+== Invokable alias
+
+`__invoke(?bool $returnIndexOnly = null): null|bool|int|float|string|SelectOption`
+
+Calling the object as a function is an alias for `display()`.
+
+[source,php]
+----
+$selected = $select();
+----
+
+:leveloffset!:
+
+<<<
+
+:leveloffset: +1
+
 = Troubleshooting
 
 == Common Issues
