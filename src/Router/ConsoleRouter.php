@@ -29,12 +29,17 @@ use Inane\Cli\{
     Cli,
     Pencil,
     Pencil\Colour};
+use Inane\Config\ConfigInterface;
 use Inane\Console\Command\{
     Argument,
     Command,
     Option};
+use Inane\File\Path;
 use Inane\Stdlib\Array\OptionsInterface;
 use Inane\Stdlib\Exception\RuntimeException;
+use Inane\Stdlib\Options;
+use Inane\Stdlib\Utility\ClassUtility;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -51,12 +56,16 @@ use function is_int;
 use function is_numeric;
 use function is_string;
 use function ksort;
+use function preg_match;
 use function sprintf;
 use function str_contains;
 use function str_starts_with;
 use function substr;
 
+use const GLOB_BRACE;
+use const GLOB_NOSORT;
 use const PHP_EOL;
+use const PREG_OFFSET_CAPTURE;
 
 /**
  * ConsoleRouter
@@ -95,6 +104,19 @@ class ConsoleRouter {
      */
     private string $executable;
 
+    private Options $config {
+        get => $this->config ??= new Options([
+            'arguments' => null,
+            'commands'  => [
+                'glob'        => null,
+                'glob_ignore' => null,
+                'default'     => [],
+                'path'        => new Path(),
+            ],
+        ]);
+        set => $this->config = $value;
+    }
+
     private static Pencil $error;   // Pencil: Output assigned a colour and style.
 
     //#endregion Properties
@@ -104,15 +126,53 @@ class ConsoleRouter {
      *
      * @param string[] $argv command line arguments, typically from `$argv`
      */
-    public function __construct(array $argv = []) {
+    public function __construct(array $argv = [], null|array|ConfigInterface|OptionsInterface $options = null) {
         $this->argv = $argv;                  // Raw argv passed to the router. | Constructs a new ConsoleRouter instance.
         $this->executable = $argv[0] ?? '';   // Path to the executable to be run. | Constructs a new ConsoleRouter instance.
 
-        if (!isset(static::$error))   // <p>Determine if a variable is set and is not <b>NULL</b>.</p>
+        if ($options)
+            $this->config->modify($options);
+
+        if (is_string($this->config->commands->path))
+            $this->config->commands->path = new Path($this->config->commands->path);
+
+        if (!isset(static::$error))   // <p>Determine if a variable is set and isn't <b>NULL</b>.</p>
             static::$error = new Pencil(Colour::Red);   // Pencil constructor
     }
 
     #region Command Execution
+
+    /**
+     * Builds and registers commands based on configuration settings.
+     *
+     * This method constructs a list of command classes from specified file patterns and default configurations.
+     * It then registers these commands for further processing or execution.
+     *
+     * @return void
+     *
+     * @throws InvalidArgumentException If the command configuration is invalid.
+     * @throws \Inane\Stdlib\Exception\Exception|ReflectionException
+     */
+    public function buildCommands(): void {
+        $commands = new Options();
+        if ($command = $this->config->commands) {
+            if ($glob = $command->glob) {
+                foreach($this->config->commands->path->getFiles($glob, GLOB_BRACE | GLOB_NOSORT) as $file) {
+                    if ($ignore = $command->glob_ignore) {
+                        preg_match($ignore, $file->getFilename(), $matches, PREG_OFFSET_CAPTURE);
+                        if (!empty($matches)) continue;
+                    }
+                    if ($ns = ClassUtility::getClassFromFile($file)) $commands[] = $ns;
+                }
+            }
+
+            if ($default = $command->default) {
+                $commands->merge($default)->unique();
+            }
+        }
+
+        $this->registerCommands($commands);
+    }
 
     /**
      * Adds a command to the internal command registry and processes its parameters and aliases.
@@ -123,18 +183,18 @@ class ConsoleRouter {
      *
      * @return void
      */
-    private function addCommand(Command $command, ReflectionMethod $method, string $class,
-    ): void {                                              // Represents a command that can be executed, with a name, description, | The <b>ReflectionMethod</b> class reports
+    private function addCommand(Command $command, ReflectionMethod $method, string $class): void {                                              // Represents a command that can be executed, with a name, description, | The <b>ReflectionMethod</b> class reports
         $params = $this->parseMethodParameters($method);   // Parses the parameters of the given ReflectionMethod and extracts metadata
 
-        $this->commands[$command->name] = [   // Registered commands map. | The name of the command.
-                                              'command' => $command,
-                                              // Executes a registered command with the given arguments.
-                                              'class'   => $class,
-                                              // Executes a registered command with the given arguments.
-                                              'method'  => $method->getName(),
-                                              // Gets function name
-                                              'params'  => $params,
+        $this->commands[$command->name] = [
+            // Registered commands map. | The name of the command.
+          'command' => $command,
+          // Executes a registered command with the given arguments.
+          'class'   => $class,
+          // Executes a registered command with the given arguments.
+          'method'  => $method->getName(),
+          // Gets function name
+          'params'  => $params,
         ];
 
         // Register aliases
@@ -220,7 +280,7 @@ class ConsoleRouter {
                 // Long option
                 $opt = substr($iValue, 2);          // Return part of a string or false on failure. For PHP8.0+ only string is returned
                 if (str_contains($opt, '=')) {   // Checks if $needle is found in $haystack and returns a boolean value
-                    [$key, $value,] = explode('=', $opt, 2);   // Split a string by a string
+                    [$key, $value] = explode('=', $opt, 2);   // Split a string by a string
                     $options[$key] = is_numeric($value) ? (int)$value : $value;
                 } else {
                     $v = isset($argv[$i + 1]) && !str_starts_with($argv[$i + 1], '-') ? $argv[++$i] : true;   // The function returns {@see true} if the passed $haystack starts from the | Parses argv into a final ordered argument list based on the parameter
@@ -248,7 +308,7 @@ class ConsoleRouter {
 
                     // Handle variadic arguments if it is the last argument.
                     if (count($arguments) > $argIndex) {   // Counts all elements in an array, or something in an object.
-                        $result = array_merge($result, array_slice($arguments, $argIndex));                   // Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
+                        $result = array_merge($result, array_slice($arguments,$argIndex));                   // Merges the elements of one or more arrays together (if the input arrays have the same string keys, then the later value for that key will overwrite the previous one; if the arrays contain numeric keys, the later value will be appended)
                     }
                 } elseif ($param['required']) {
                     throw new RuntimeException("Required argument '{$param['name']}' is missing.");   // Construct the exception. Note: The message is NOT binary safe.   // Custom construct template
@@ -288,7 +348,7 @@ class ConsoleRouter {
      * If a command name is supplied, the method outputs detailed help for that command.
      * Otherwise, it shows an overview of all available commands along with global options.
      *
-     * @param string|null $commandName The name of the command for which help is requested. If null, shows a list of all commands.
+     * @param null|string $commandName The name of the command for which help is requested. If null, shows a list of all commands.
      *
      * @return void
      */
