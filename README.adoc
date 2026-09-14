@@ -720,7 +720,7 @@ public function importData(
 
 ==== `__construct(array $argv = [])`
 
-Initialize the router with command-line arguments.
+Initialise the router with command-line arguments.
 
 [source,php]
 ----

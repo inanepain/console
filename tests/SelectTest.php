@@ -115,7 +115,7 @@ final class SelectTest extends TestCase {
  */
 final class DummyScreen extends Screen {
     /**
-     * Initializes a new instance of the class.
+     * Initialises a new instance of the class.
      *
      * This constructor sets up any necessary initial configurations or states for the class.
      *

@@ -36,7 +36,7 @@ namespace Inane\Console\Command;
 #[\Attribute(\Attribute::TARGET_PARAMETER | \Attribute::IS_REPEATABLE)]
 class Option {
     /**
-     * Constructor method to initialize the class with specific properties.
+     * Constructor method to initialise the class with specific properties.
      *
      * @param string      $name        The name of the option.
      * @param string|null $shortcut    An optional shortcut for the option.

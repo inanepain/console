@@ -43,7 +43,7 @@ use const PHP_EOL;
 class Select extends AbstractControl {
     #region PROPERTIES
     /**
-     * Holds the current value, initialized to zero.
+     * Holds the current value, initialised to zero.
      */
     protected int $current = 0;
 

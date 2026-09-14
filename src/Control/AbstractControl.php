@@ -27,7 +27,7 @@ namespace Inane\Console\Control;
 /**
  * AbstractControl is a base class providing functionality to manage
  * a shared static instance of a Screen object. It defines methods
- * to initialize and retrieve this static instance.
+ * to initialise and retrieve this static instance.
  */
 class AbstractControl {
     /**
