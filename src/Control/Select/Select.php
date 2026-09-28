@@ -28,17 +28,17 @@ use Inane\Console\Control\AbstractControl;
 use Inane\Console\Control\Screen;
 use Inane\Stdlib\Exception\ConfigurationException;
 use Inane\Stdlib\Exception\RuntimeException;
+use InvalidArgumentException;
 
 use function array_is_list;
 use function count;
 use function fread;
+use function is_string;
 
 use const PHP_EOL;
 
 /**
- * Escape sequence for moving the cursor up in the terminal.
- *
- * @var string
+ * Displays an interactive console menu and returns the selected option or its index.
  */
 class Select extends AbstractControl {
     #region PROPERTIES
@@ -48,34 +48,33 @@ class Select extends AbstractControl {
     protected int $current = 0;
 
     /**
-     * key
-     *
-     * @${CARET}
+     * The last key sequence read from standard input, or false when reading fails.
      *
      * @var false|string
      */
     private string|false $key;
 
     /**
-     * screen
-     *
-     * @${CARET}
+     * Screen used to control the terminal during selection.
      *
      * @var Screen
      */
     protected(set) Screen $screen;
 
     /**
-     * Stores the `SelectOption` menu items.
+     * Menu options in display order.
+     *
+     * @var list<SelectOption>
      */
     protected array $menuOptions = [];
+
     #endregion PROPERTIES
 
     /**
      * Constructs the class with initial items, a prompt message, configuration for return type, and an optional screen instance.
      *
      * NOTE: SelectOption
-     * When specifying items as `SelectOption` objects, the `index` does not need to be unique across items.
+     * When specifying items as `SelectOption` objects, the `index` doesn't need to be unique across items.
      * This allows for a kind of item grouping with the `index` acting as a group identifier.
      * Future releases may expand on this feature, making it more intuitive.
      *
@@ -83,11 +82,16 @@ class Select extends AbstractControl {
      * @param string      $prompt           The prompt message to display. Defaults to 'Use ↑/↓ to navigate, Enter to select'.
      * @param null|string $menuOptionFormat An optional format string for setting the display of menu items for the select replacing indevidual items format. Defaults to null (fallback `SelectOption`).
      * @param bool        $returnIndexOnly  Indicates whether only the index of the selected item should be returned. Defaults to false which returns a `SelectOption` object.
-     * @param Screen|null $screen           An optional Screen instance. If null, a new instance of Screen will be created.
+     * @param null|Screen $screen           An optional Screen instance. If null, a new instance of Screen will be created.
      *
      * @return void
      */
     public function __construct(
+        /**
+         * Items used to populate the selectable menu.
+         *
+         * @var array
+         */
         protected(set) array   $items = [] {
             get => $this->items;
             /**
@@ -99,8 +103,23 @@ class Select extends AbstractControl {
                 $this->populateMenuOptions();
             }
         },
+        /**
+         * Prompt displayed above the menu.
+         *
+         * @var string
+         */
         protected(set) string  $prompt = 'Use ↑/↓ to navigate, Enter to select',
+        /**
+         * Optional format overriding each option's display format.
+         *
+         * @var null|string
+         */
         protected(set) ?string $menuOptionFormat = null,
+        /**
+         * Whether to return the option index instead of the option itself.
+         *
+         * @var bool
+         */
         protected(set) bool    $returnIndexOnly = false,
         ?Screen                $screen = null,
     ) {
@@ -113,7 +132,7 @@ class Select extends AbstractControl {
      *
      * @return self
      *
-     * @throws \InvalidArgumentException If the items array is not iterable or contains invalid elements.
+     * @throws InvalidArgumentException If the items array is not iterable or contains invalid elements.
      * @throws ConfigurationException If no menu items are provided.
      */
     protected function populateMenuOptions(): self {
@@ -125,6 +144,7 @@ class Select extends AbstractControl {
                 $this->menuOptions[] = $item;
             } else {
                 if (is_string($item)) $item = ['label' => $item];
+                // List positions are zero-based; menu option indices start at one.
                 if (array_is_list($this->items)) {
                     $this->menuOptions[] = new SelectOption($index + 1, ...$item);
                 } else {
@@ -180,7 +200,7 @@ class Select extends AbstractControl {
      *
      * @return void
      *
-     * @throws \InvalidArgumentException If the provided key is not recognized.
+     * @throws InvalidArgumentException If the provided key is not recognized.
      */
     protected function handleNavigation(): void {
         switch ($this->key) {
@@ -217,7 +237,7 @@ class Select extends AbstractControl {
      *
      * Returns the item at the current position in the list of items.
      *
-     * @param bool|null $returnIndexOnly Whether to return the index of the selected item only.
+     * @param null|bool $returnIndexOnly Whether to return the index of the selected item only.
      *
      * @return null|bool|int|float|string|SelectOption The currently selected item.
      *
@@ -237,7 +257,7 @@ class Select extends AbstractControl {
      * Manages the screen rendering, input handling, and selection process in a loop
      * until an item is selected. Restores terminal settings upon completion.
      *
-     * @param bool|null $returnIndexOnly Whether to return the index of the selected item only.
+     * @param null|bool $returnIndexOnly Whether to return the index of the selected item only.
      *
      * @return null|bool|int|float|string|SelectOption The selected item.
      *
@@ -262,7 +282,7 @@ class Select extends AbstractControl {
     /**
      * Invokes the object as a callable to display the content.
      *
-     * @param bool|null $returnIndexOnly Whether to return the index of the selected item only.
+     * @param null|bool $returnIndexOnly Whether to return the index of the selected item only.
      *
      * @return null|bool|int|float|string|SelectOption The output generated by the display method.
      *

@@ -5,16 +5,16 @@ for choosing one item from a list.
 
 == Constructor
 
-`__construct(array $items, string $prompt = 'Use ↑/↓ to navigate, Enter to select', ?string $menuOptionFormat = null, bool $returnIndexOnly = false, ?Screen $screen = null)`
+`__construct(array $items = [], string $prompt = 'Use ↑/↓ to navigate, Enter to select', ?string $menuOptionFormat = null, bool $returnIndexOnly = false, ?Screen $screen = null)`
 
-* `$items`: Menu items as scalar values or `SelectOption` objects.
-* `$prompt`: Prompt shown under the menu.
-* `$menuOptionFormat`: Optional format override for item display.
-* `$returnIndexOnly`: Return index/value instead of `SelectOption`.
-* `$screen`: Optional `Screen` instance.
+* `$items`: Menu items as strings, option arrays or `SelectOption` objects.
+* `$prompt`: Prompt shown above the menu.
+* `$menuOptionFormat`: Optional format applied to every item, overriding each item's own format.
+* `$returnIndexOnly`: Return the option index instead of the `SelectOption`.
+* `$screen`: Optional `Screen` instance. When omitted a shared screen is used.
 
 NOTE: The control requires at least one item; an empty list throws a
-configuration exception.
+`Inane\Stdlib\Exception\ConfigurationException`.
 
 [source,php]
 ----
@@ -27,21 +27,59 @@ $select = new Select([
 ]);
 ----
 
+== Menu items
+
+Items may be mixed within the same list:
+
+* A plain string is used as the label.
+* An array may set `label` and `menuFormat`.
+* A `SelectOption` sets its own index, label and format.
+
+For items that are not `SelectOption` objects the index is derived from the
+array: list arrays get a 1-based index, keyed arrays use the key.
+
+[source,php]
+----
+use Inane\Console\Control\Select\Select;
+use Inane\Console\Control\Select\SelectOption;
+
+$select = new Select(items: [
+    'plant'  => 'Avo',
+    'fruit'  => 'Banana',
+    'animal' => ['label' => 'Cat', 'menuFormat' => '* {l}'],
+    new SelectOption('animal', 'Dog'),
+], prompt: 'Select an option:');
+----
+
+NOTE: `SelectOption` indexes need not be unique, allowing items to be grouped
+under a shared index.
+
+=== Format placeholders
+
+`menuFormat` (and `menuOptionFormat`) support:
+
+* `{l}`: the option label.
+* `{i}`: the option index.
+
+The default `SelectOption` format is `{l}`.
+
 == Display and selection
 
 `display(?bool $returnIndexOnly = null): null|bool|int|float|string|SelectOption`
 
-Shows the interactive menu and returns the selected item.
+Shows the interactive menu, navigated with ↑/↓ and confirmed with Enter, and
+returns the selected item.
 
 [source,php]
 ----
 $selectedOption = $select->display();
 
-echo $selectedOption->index; // 1-based index for list items
-echo $selectedOption->value;
+echo $selectedOption->index; // value returned for this option
+echo $selectedOption->label; // displayed text
+echo $selectedOption;        // label, via Stringable
 ----
 
-Use `$returnIndexOnly` when only the selected key/index is needed:
+Use `$returnIndexOnly` when only the selected index is needed:
 
 [source,php]
 ----
@@ -62,4 +100,16 @@ Calling the object as a function is an alias for `display()`.
 [source,php]
 ----
 $selected = $select();
+$index    = $select(true);
+----
+
+== Screen
+
+The read-only `screen` property exposes the `Screen` used by the control. When
+no screen is supplied a shared instance is used, so separate menus co-operate on
+the same terminal.
+
+[source,php]
+----
+$menu->screen->beep('Exiting...');
 ----

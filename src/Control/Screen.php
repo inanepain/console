@@ -4,10 +4,12 @@
  * Console Screen
  *
  * Inane Library
- *
  * Provides a terminal screen and `stty` helpers used by interactive console controls.
  *
- * PHP version 8.5
+ *  $Id$
+ *  $Date$
+ *
+ *  PHP version 8.5
  *
  * @author   Philip Michael Raab <philip@cathedral.co.za>
  * @package  inanepain\console
@@ -126,7 +128,7 @@ class Screen {
         exec('stty -a 2>/dev/null', $output, $code);
 
         if ($code !== 0) {
-            throw new RuntimeException('Failed to run stty');
+            throw new RuntimeException("Couldn't configure the terminal with stty");
         }
 
         // Extract the local flags section and normalise spacing before tokenising.
@@ -215,7 +217,7 @@ class Screen {
      */
     protected function setLFlag(string $flag, bool $enable): bool {
         if (!array_key_exists($flag, $this->flags['lflags'])) {
-            throw new RuntimeException("The flag '$flag' does not exist in 'lflags'.");
+            throw new RuntimeException("The flag '$flag' doesn't exist in 'lflags'.");
         }
 
         if ($enable && $this->flags['lflags'][$flag] === false) {

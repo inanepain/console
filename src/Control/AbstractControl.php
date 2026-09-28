@@ -25,40 +25,35 @@ declare(strict_types = 1);
 namespace Inane\Console\Control;
 
 /**
- * AbstractControl is a base class providing functionality to manage
- * a shared static instance of a Screen object. It defines methods
- * to initialise and retrieve this static instance.
+ * Provides controls with a shared, lazily initialised screen.
  */
 class AbstractControl {
     /**
-     * The static screen instance.
+     * Screen shared by controls using this base class.
      *
-     * NOTE: Can only be set once.
+     * The first screen assigned is retained for later controls.
      *
      * @var Screen
      */
     protected static Screen $staticScreen;
 
     /**
-     * Sets the static screen instance if it has not been set already.
+     * Initialises the shared screen if it hasn't been set.
      *
-     * NOTE: Can only be set once.
-     *
-     * @param Screen|null $screen The screen instance to be set. If null, a new Screen instance will be created and set.
+     * @param null|Screen $screen Optional screen to use instead of creating one.
      *
      * @return void
      */
     protected function setStaticScreen(?Screen $screen = null): void {
+        // An existing screen takes precedence over any later screen supplied by a control.
         if (!isset(static::$staticScreen))
             static::$staticScreen = $screen ?? new Screen();
     }
 
     /**
-     * Retrieves the static screen instance.
+     * Retrieves the shared screen, creating it on first access if needed.
      *
-     * NOTE: If not set, a new Screen instance will be created and set.
-     *
-     * @return Screen The static screen instance.
+     * @return Screen The shared screen.
      */
     protected function getStaticScreen(): Screen {
         $this->setStaticScreen();

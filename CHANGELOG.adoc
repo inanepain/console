@@ -23,6 +23,9 @@
 :revdate: 2026-06-xx
 :revremark: -dev
 
+* update: `Select` and `SelectOption` improved handling of *$items* array.
+* update: `Select` documentation.
+
 :leveloffset!:
 :leveloffset: +2
 

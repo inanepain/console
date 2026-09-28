@@ -49,8 +49,23 @@ class SelectOption implements Stringable {
      * @return void
      */
     public function __construct(
+        /**
+         * Value associated with this option.
+         *
+         * @var null|bool|int|float|string
+         */
         protected(set) null|bool|int|float|string $index,
+        /**
+         * Text displayed for this option.
+         *
+         * @var string
+         */
         protected(set) string                     $label,
+        /**
+         * Default format used when rendering this option.
+         *
+         * @var string
+         */
         protected(set) string                     $menuFormat = '{l}',
     ) {
         // Property promotion performs all option initialisation.
