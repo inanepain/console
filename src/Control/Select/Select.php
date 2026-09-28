@@ -92,7 +92,8 @@ class Select extends AbstractControl {
             get => $this->items;
             /**
              * @throws ConfigurationException If no menu items are provided.
-             */ set {
+             */
+            set {
                 $this->current = 0;
                 $this->items = $value;
                 $this->populateMenuOptions();
@@ -123,10 +124,12 @@ class Select extends AbstractControl {
             if ($item instanceof SelectOption) {
                 $this->menuOptions[] = $item;
             } else {
-                if (array_is_list($this->items))
-                    $this->menuOptions[] = new SelectOption($index + 1, $item);
-                else
-                    $this->menuOptions[] = new SelectOption($index, $item);
+                if (is_string($item)) $item = ['label' => $item];
+                if (array_is_list($this->items)) {
+                    $this->menuOptions[] = new SelectOption($index + 1, ...$item);
+                } else {
+                    $this->menuOptions[] = new SelectOption($index, ...$item);
+                }
             }
         }
 
