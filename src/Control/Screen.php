@@ -136,8 +136,8 @@ class Screen {
 
         $flatFlags = preg_replace('/\s+/', ' ', $matches[0])
                 |> trim(...)
-                |> (static fn($x) => preg_replace('/ cchars:.*$/', '', $x))
-                |> (static fn($x) => explode(' ', $x));
+                |> preg_replace('/ cchars:.*$/', '', ?)
+                |> explode(' ', ?);
 
         $this->flags = [];
         $grp = '';
